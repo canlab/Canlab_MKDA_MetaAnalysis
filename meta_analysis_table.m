@@ -12,6 +12,10 @@ function OUT = meta_analysis_table(XYZlist,r,varargin)
 % stand-alone:
 %   cl = database_point_probe(PAINDB2,[-42 0 2],10,fl);
 %   dbcluster_point_table(cl)
+%
+% If multiple ROI coordinates (rows) are entered, this function will tabulate
+% results for activation in *any* of the ROIs (union). e.g., one could test
+% for specificity of activations in S2 across left and right.
 
 if size(XYZlist, 2) ~= 3
     XYZlist = XYZlist';
