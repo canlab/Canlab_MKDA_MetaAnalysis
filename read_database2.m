@@ -3,7 +3,7 @@ function DB = read_database2(name, savename, varargin)
 %
 % Usage:
 %   -------------------------------------------------------------------------
-%   [list outputs here] = function_name(name, savename, ['CalculateContrasts'])
+%   DB = read_database2(name, savename, ['CalculateContrasts'])
 %  
 %   - runs Meta_Setup with a default 10 mm smoothing kernel
 %   - Limited checking of mandatory fields - this could be improved
@@ -29,6 +29,9 @@ function DB = read_database2(name, savename, varargin)
 %   Inputs:
 %   -------------------------------------------------------------------------
 %   name                    Name of CSV file, e.g., 'my_spreadsheet.csv'
+%                           Note: may not work well for .txt files that are
+%                           not CSV!!
+%
 %   'CalculateContrasts'    Optional keyword re-generates DB.Contrasts
 %
 %   Outputs:
@@ -50,6 +53,10 @@ function DB = read_database2(name, savename, varargin)
 
 dat = importdata(name);
 dat.names = dat.textdata(1, :)';
+
+% could build xls reader here
+%[dat, textdat] = xlsread(name);
+
 
 %% Reformat into DB structure
 

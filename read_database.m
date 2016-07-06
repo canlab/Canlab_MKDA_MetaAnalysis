@@ -118,15 +118,37 @@ elseif iscell(x) || iscell(y) || iscell(z)
     disp('Database must have columns named x, y, and z, which contain numeric coordinates.');
     
     disp('Finding errors:')
-    for i = 1:length(x)
-        try
-            xx(i, 1) = str2num(x{i});
-            yy(i, 1) = str2num(y{i});
-            zz(i, 1) = str2num(z{i});
-        catch
-            fprintf('Row %3.0f : Bad value for x, y, or z.  Values entered are : %s %s %s\n', i, x{i}, y{i}, z{i});
-        end
+    
+    if iscell(x)
+        xx = cellfun(@str2num, x, 'UniformOutput', 0);
+        fprintf('x has %d bad values.\nRows:\n', sum(cellfun(@isempty, xx)));
+        find(cellfun(@isempty, xx))
     end
+    
+    if iscell(y)
+        yy = cellfun(@str2num, y, 'UniformOutput', 0);
+        fprintf('x has %d bad values.\nRows:\n', sum(cellfun(@isempty, yy)));
+        find(cellfun(@isempty, yy))
+    end
+    
+    
+    if iscell(z)
+        zz = cellfun(@str2num, z, 'UniformOutput', 0);
+        fprintf('z has %d bad values.\nRows:\n', sum(cellfun(@isempty, zz)));
+        find(cellfun(@isempty, zz))
+        z(find(cellfun(@isempty, zz)))
+    end
+    
+
+%     for i = 1:length(x)
+%         try
+%             xx(i, 1) = str2num(x{i});
+%             yy(i, 1) = str2num(y{i});
+%             zz(i, 1) = str2num(z{i});
+%         catch
+%             fprintf('Row %3.0f : Bad value for x, y, or z.  Values entered are : %s %s %s\n', i, x{i}, y{i}, z{i});
+%         end
+%     end
     
     error('One of these seems to have non-numeric values in at least one row (check for blank spaces/empty row at the end!)')
 end

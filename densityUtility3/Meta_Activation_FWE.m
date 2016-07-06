@@ -1,14 +1,34 @@
-%Meta_Activation_FWE(meth)
+% Meta_Activation_FWE(meth)
 %
+% This function sets up an MKDA analysis, starts or adds iterations, and
+% retrieves and plots results.  It has four modes, specified by the first input argument:
+%
+% 'setup'   : Create activation map and save MC_SETUP file in current directory
+% 'mc'      : Add iterations and save in MC_Info in current dir
+% 'results' : Get results
+% 'all'     : Doo all of the above in sequence
+%
+% See below for specific formatting strings:
+% 
+% ALL
+% ----------------------------------------------------------------------
 % Meta_Activation_FWE('all', DB, iterations)   [default]
 % > Run all of the commands below in sequence
 %
+% SETUP
+% ----------------------------------------------------------------------
 % MC_Setup = Meta_Activation_FWE('setup', DB)
 % > Create activation map .img and MC_Setup structure; save MC_Info
+% Optional argument: 'nocontrasts' avoids interactive query and skips
+% contrats step
 %
+% MC
+% ----------------------------------------------------------------------
 % Meta_Activation_FWE('mc', iterations)
 % > Create or add null hypothesis iterations to MC_Info
 %
+% RESULTS
+% ----------------------------------------------------------------------
 % Meta_Activation_FWE('results')
 % > Get and plot results
 % Examples:
@@ -38,11 +58,14 @@
 % cl_posneg = Meta_Activation_FWE('results', 1, 'height', 'stringent', 'medium', 'poscon'); 
 % cl_negpos = Meta_Activation_FWE('results', 1, 'height', 'stringent', 'medium', 'negcon', 'add', 'colors', { [0 0 1] [0 .5 1] [.3 .3 1] });
 %
-% by Tor Wager, May 2006
+% by Tor Wager, May 2006.  See Programmers' notes in function for more details.
+
+% by Tor Wager, May 2006.
 % edited by Matthew Davidson June 2006
 % modified: tor, Aug 2006
 % tor: Sept, 2009: add cl output to "results" mode (minor)
 % tor: march 2010, to add bivalent colors 'add' option
+% tor: june 2016, added 'nocontrasts' option and a bit of documentation
 
 % Programmers' notes:
 % 4.7.2013  There was a bug in Meta_Activation_FWE that made it not robust to using 
@@ -74,7 +97,12 @@ function varargout = Meta_Activation_FWE(meth, varargin)
             % ------------------------------------------------
             DB = meta_check_dbsetup(varargin{1});
 
-            docons = input('Compute contrasts across conditions also? (1/0)');
+            if any(strcmp(varargin, 'nocontrasts'))
+                docons = false;
+            else
+                docons = input('Compute contrasts across conditions also? (1/0)');
+            end
+            
             if docons
                 [X,connames, DB, Xi, Xinms, condf, testfield, contrasts] = Meta_Logistic_Design(DB);
                 [MC_Setup, activation_proportions] = meta_prob_activation(DB, Xi, contrasts, connames, Xinms);
