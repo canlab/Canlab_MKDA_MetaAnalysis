@@ -115,16 +115,22 @@ function  maxcsize = get_max_cluster_size(ivectors,xyzlist,prop)
 % save max cluster size info
 wh = find(ivectors >= prop);
 
+% If empty, no voxels above threshold
+if isempty(wh), maxcsize = 0; return, end
+
 if length(wh) > 50000, maxcsize = Inf; end
 
 xyz = xyzlist(wh,:)';
 clust = spm_clusters(xyz);
 u = unique(clust);
+
 clsize = [];         % init to avoid error in Matlab 2013/csize is a function
 for i = 1:length(u)
     clsize(i) = sum(clust == i);
 end
+
 maxcsize = max(clsize);
+
 return
 
 
