@@ -80,6 +80,11 @@
 % This affects MKDA difference analyses (contrasts) when contrast numbers are not 
 % entered in ascending numerical order in your database. It also affects classification 
 % with Meta_NBC_from_mkda, but not Meta_SVM_from_mkda.
+%
+% 2.23.2017     There was a bug in results display when using only selected
+% thresholds, rather than the full set of "stringent" "medium" "lenient"
+% (which gave correct values).  Tor fixed this, and added functionality to
+% save separate results masks for each threshold you select.
 
 function varargout = Meta_Activation_FWE(meth, varargin)
     varargout = {};
@@ -223,8 +228,8 @@ function varargout = Meta_Activation_FWE(meth, varargin)
             % get and plot thresholds
             [maxthr,uncor_thr,maxcthr] = get_thresholds(maxprop, uncor_prop, maxcsize, maptype, doplots, conidx);
 
-            % thresholds to save, based on input
-            whomsave = logical([usestringent usemedium uselenient]);
+            % thresholds to save, based on input; (Tor - fix, Feb 2017)
+            whomsave = logical([uselenient usemedium usestringent]);
 
             
             % plot proportions or contrast in statmap
@@ -234,9 +239,10 @@ function varargout = Meta_Activation_FWE(meth, varargin)
             end
 
             % get rid of thresholds we're not interested in seeing in
-            % figures
-            uncor_thr = uncor_thr(whomsave);
-            maxcthr = maxcthr(whomsave);
+            % figures - NOTE: Cannot remove because code below assumes same
+            % order
+%             uncor_thr = uncor_thr(whomsave);
+%             maxcthr = maxcthr(whomsave);
             
             % Height threshold -- whole brain FWE corrected
             if(useheight)
@@ -262,13 +268,26 @@ function varargout = Meta_Activation_FWE(meth, varargin)
 
                 % Extent threshold --  corrected based on cluster size
                 if(usestringent)
-                    e1 = meta_cluster_extent_threshold(MC_Setup.volInfo.xyzlist', statmap, uncor_thr(1), maxcthr(1));
+                    
+                    e1 = meta_cluster_extent_threshold(MC_Setup.volInfo.xyzlist', statmap, uncor_thr(3), maxcthr(3));
+                    % Write results image
+                    indic2mask(e1, statmap, MC_Setup, [imgprefix '_FWE_extent_stringent.img']);
+                    
                 end
+                
                 if(usemedium)
                     e2 = meta_cluster_extent_threshold(MC_Setup.volInfo.xyzlist', statmap, uncor_thr(2), maxcthr(2));
+                    % Write results image
+                    indic2mask(e2, statmap, MC_Setup, [imgprefix '_FWE_extent_medium.img']);
+                    
                 end
+                
                 if(uselenient)
-                    e3 = meta_cluster_extent_threshold(MC_Setup.volInfo.xyzlist', statmap, uncor_thr(3), maxcthr(3));
+                    
+                    e3 = meta_cluster_extent_threshold(MC_Setup.volInfo.xyzlist', statmap, uncor_thr(1), maxcthr(1));
+                    % Write results image
+                    indic2mask(e3, statmap, MC_Setup, [imgprefix '_FWE_extent_lenient.img']);
+                    
                 end
 
                 e = e1 | e2 | e3;
@@ -289,8 +308,8 @@ function varargout = Meta_Activation_FWE(meth, varargin)
 
                 % multi-threshold view
                 [cl,dat] = iimg_multi_threshold(statmap, ...
-                    'thresh', [maxthr sort(uncor_thr,'descend')], ...
-                    'size', [1 sort(maxcthr)], ...
+                    'thresh', [maxthr sort(uncor_thr(whomsave),'descend')], ...
+                    'size', [1 sort(maxcthr(whomsave))], ...
                     'volInfo', MC_Setup.volInfo,'colors',colors, addstr);
 
                 disp(['Saving clusters as cl variable in ' imgprefix '_clusters.mat']);
@@ -756,9 +775,9 @@ function  indic = meta_cluster_extent_threshold(xyzlist,data,thr1,sizethr)
     % check size OK
     n = size(xyzlist,2);
 
-    if n > 50000
-        disp('Too many voxels meet primary threshold. Cannot perform cluster-based thresholding.');
-        return
+    if n > Inf %50000  % Bug in SPM has been fixed, Tor removed limitation - 2/2017
+%         disp('Too many voxels meet primary threshold. Cannot perform cluster-based thresholding.');
+%         return
     elseif n == 0
         disp('Warning!  No voxels meet primary threshold; this is unusual...');
         return
