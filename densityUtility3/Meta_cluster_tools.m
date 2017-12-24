@@ -8,12 +8,13 @@ function varargout = Meta_cluster_tools(meth,varargin)
 % ------------------------------------------------------
 % extract data and print a table for a set of meta-analysis clusters
 %
-% cl = make_table(cl,MC_Setup,['plot'],['successive'])
+% cl = Meta_cluster_tools('make_table', cl, MC_Setup, ['plot'],['successive'])
+%
 % Example:
 % load Valence_Neg-Pos_Pos_clusters; load MC_Info
 %
 % cl1 = Meta_cluster_tools('make_table',cl{1},MC_Setup);
-% cl = Meta_cluster_tools('make_table',cl,MC_Setup,'successive');
+% cl = Meta_cluster_tools('make_table', cl, MC_Setup, 'successive');
 %
 % ------------------------------------------------------
 %
@@ -122,11 +123,12 @@ end
 % -------------------------------------------------------------------------
 
 
-function cl = make_table(cl,MC_Setup,doplot,dosuccessive)
+function cl = make_table(cl, MC_Setup, doplot, dosuccessive)
 
 % uses Xi and Xinms to get differences among conditions
 % if there is no Xi field, we don't have differences among
 % conditions, so create a dummy one to get overall proportion
+
 if ~isfield(MC_Setup,'Xi')
     MC_Setup.Xi = ones(size(MC_Setup.wts));
     MC_Setup.Xinms = {'Act'};

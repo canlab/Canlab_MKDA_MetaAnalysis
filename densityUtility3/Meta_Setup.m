@@ -8,7 +8,7 @@
 %
 % Subjects or N     : sample size
 % FixedRandom       : fixed or random effects
-% Subjective Weights : weighting vector based on FixedRandom and whatever
+% SubjectiveWeights : weighting vector based on FixedRandom and whatever
 %   else you want to weight by; e.g., study reporting threshold
 % x, y, z           : coordinates
 % study or Study    : name of study
@@ -140,7 +140,7 @@ function DB = Meta_Setup(DB, varargin)
         DB.z = DB.Z;
     end
 
-    if ~isfield(DB,'xyz'),
+    if ~isfield(DB,'xyz')
         disp('No xyz field in DB.  Creating from x, y, z.');
         DB.xyz = [DB.x DB.y DB.z];
     end

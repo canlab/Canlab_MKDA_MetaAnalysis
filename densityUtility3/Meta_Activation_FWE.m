@@ -32,9 +32,9 @@
 % Meta_Activation_FWE('results')
 % > Get and plot results
 % Examples:
-% For contrasts, positive con values.  The 1 below indicates to make plots.
+% For contrasts, positive contrast values.  The 1 below indicates to make plots.
 % cl = Meta_Activation_FWE('results', 1, 'poscon')
-% Negative con values
+% Negative contrast values
 % cl = Meta_Activation_FWE('results', 1, 'negcon')
 % Which thresholds to use:
 % Meta_Activation_FWE('results', 1, 'height', 'stringent', 'medium', 'lenient') [default]
