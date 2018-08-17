@@ -596,8 +596,10 @@ end % setup mc vars
 function [MC_Setup, statmap, imgprefix, maxprop, uncor_prop, maxcsize, conidx] = setup_results_vars(maptype, conidx)
 
     % should be loaded in file
-    MC_Setup = []; maxprop = [];  uncor_prop = []; maxcsize = [];
+    % MC_Setup = []; maxprop = [];  uncor_prop = []; maxcsize = [];
 
+    [MC_Setup, statmap, imgprefix, maxprop, uncor_prop, maxcsize, conidx] = deal([]);
+        
     % load file
     % ------------
     if ~exist('MC_Info.mat','file')
@@ -632,10 +634,17 @@ function [MC_Setup, statmap, imgprefix, maxprop, uncor_prop, maxcsize, conidx] =
             statmap = setup_activation_proportions(activation_proportions, MC_Setup);
 
             imgprefix = 'Activation';
+            
         otherwise
             % contrast across conditions
             % statmap = MC_Setup.con_data;
 
+            if ~isfield(MC_Setup, 'con_data')
+                disp('Warning: You have asked to view contrast results, but there are no contrasts across studies in MC_Setup.');
+                error('Exiting');
+                return
+            end
+            
             if(~exist('conidx', 'var') || isempty(conidx))
                 num_contrasts = size(MC_Setup.con_data, 2);
                 if num_contrasts > 1
