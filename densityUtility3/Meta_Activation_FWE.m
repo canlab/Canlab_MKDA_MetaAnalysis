@@ -732,7 +732,7 @@ function [maxthr,uncor_thr,maxcthr] = get_thresholds(maxprop, uncor_prop, maxcsi
     maxcthr = prctile(current_maxcsize, 95);
 
     if doplots
-        tor_fig(1,3);
+        create_figure('densities', 1, 3);
 
         [h,x] = prepare_histogram(current_maxprop);
 

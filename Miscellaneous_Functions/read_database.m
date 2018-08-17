@@ -256,9 +256,12 @@ else
     if isempty(dbsave)
         dbsave = input('Enter name of file to save (without .mat extension): ','s'); 
     end
+    
+    eval(['save ' dbsave])
+    
 end
 
-eval(['save ' dbsave])
+
 
 
 
