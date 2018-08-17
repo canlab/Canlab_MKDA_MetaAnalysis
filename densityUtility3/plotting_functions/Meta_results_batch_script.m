@@ -123,6 +123,10 @@ drawnow, snapnow
 
 %% Print transparent blobs and activation points on slice montage
 
+% load database with coordinates
+load SETUP DB
+if ~isfield(DB, 'xyz'), DB.xyz = [DB.x DB.y DB.z]; end
+
 o2 = removeblobs(o2);   
 o2 = addblobs(o2, r, 'trans', 'transvalue', .4);
 o2 = addpoints(o2, DB.xyz, 'MarkerFaceColor', [.5 0 0], 'Marker', 'o', 'MarkerSize', 4);

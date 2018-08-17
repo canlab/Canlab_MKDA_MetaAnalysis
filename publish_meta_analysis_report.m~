@@ -48,7 +48,7 @@ p = struct('useNewFigure', false, 'maxHeight', 800, 'maxWidth', 1600, ...
 
 publish('Meta_results_batch_script.m', p);
 
-myhtmlfile = fullfile(pubdir, pubfilename, 'Meta_results_batch_script.html');
+myhtmlfile = fullfile(pubdir, pubfilename, 'Meta_results_bat.html');
 
 if exist(myhtmlfile, 'file')
     
