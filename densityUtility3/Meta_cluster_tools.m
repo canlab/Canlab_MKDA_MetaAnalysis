@@ -84,6 +84,7 @@ switch meth
         
         %[studybyroi,studybyset] = Meta_cluster_tools('getdata',cl,MC_Setup.unweighted_study_data)
         %[studybyroi,studybyset] = getdata(cl,inputdata)
+        
         if length(varargin) < 3
             [varargout{1},varargout{2},varargout{3}] = getdata(varargin{1},varargin{2});
         else
@@ -196,6 +197,11 @@ end
 
 
 function [studybyroi,studybyset, cl] = getdata(cl,inputdata,varargin)
+
+if isa(cl, 'region')
+    % If region, convert to clusters structure so we can add ad hoc fields
+    cl = region2struct(cl);
+end
 
 if length(varargin) > 0
     volInfo = varargin{1};
