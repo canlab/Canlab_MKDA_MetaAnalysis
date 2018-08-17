@@ -1,16 +1,51 @@
 % script read_database
 % reads a neuroimaging coordinate database with fields
 % and transforms T88 coordinates to MNI coordinates
-% RULES
+% When you set up your own database, several rules apply. Formatting the spreadsheet
+% so it loads correctly can sometimes be the hardest part of running a
+% meta-analysis.
 %
-% 1     specify database name as dbname in workspace
-% 2     database must be text file, tab delimited
-% 3     1st row of database must contain number of columns as 1st entry
-% 4     2nd row of database must be variable names
-% 5     3rd - nth row of dbase contains data
-% 6     Talairach coordinates are indicated by T88 in CoordSys variable
-% 7     coordinate fields should be called x, y, and z
-% 8     Do NOT use Z, or any other field name in clusters structure
+% See https://canlabweb.colorado.edu/wiki/doku.php/help/meta/meta_analysis_mkda
+% 
+% And https://canlabweb.colorado.edu/wiki/doku.php/help/meta/database
+%
+% Here are some rules for setting up the file:
+%   1     The variable "dbname" in the workspace should specify the name of your coordinate database file
+%   2     The database must be a text file, tab delimited
+%   3     The 1st row of the database must contain the number of columns as its 1st and only entry
+%   4     The 2nd row of database must contain variable names (text, no spaces or special characters)
+%   5     The 3rd - nth rows of the database contains data
+%   6     Talairach coordinates are indicated by T88 in CoordSys variable
+%   7     coordinate fields should be called x, y, and z
+%   8     Do NOT use Z, or any other field name in clusters structure
+% 
+% The second row of your database should contain names for each variable
+% you have coded.  Some variables should be named with special keywords,
+% because they are used in the meta-analysis code. Other variables can be named 
+% anything, as long as there are *no spaces or special characters* in the
+% name (e.g., !@#$%^&*(){}[] ~`\/|<>,.?/;:"''+=). 
+% Anything that you could not name a variable in Matlab will also not work
+% here. 
+% Here are the variable names with special meaning. They are case-sensitive:
+%
+% Subjects          : Sample size of the study to which the coordinate belongs
+% FixedRandom       : Study used fixed or random effects. 
+%                     Values should be Fixed or Random.
+%                     Fixed effects coordinates will be automatically
+%                     downweighted
+% SubjectiveWeights : A coordinate or contrast weighting vector based on FixedRandom 
+%                     and whatever else you want to weight by; e.g., study reporting threshold
+%                     The default is to use FixedRandom only if available
+% x, y, z           : X, Y, and Z coordinates
+% study             : name of study
+% Contrast          : unique indices (e.g., 1:k) for each independent
+%                     contrast. This is a required variable!
+%                     All rows belonging to the same contrast should
+%                     (almost) always have the same values for every
+%                     variable other than x, y, and z.
+% CoordSys          : Values should be MNI or T88, for MNI space or Talairach space
+%                     Talairach coordinates will be converted to MNI using
+%                     Matthew Brett's transform
 %
 % Note: On MAC, seems to read stuff saved as Windows Text in Excel
 % 
@@ -29,30 +64,20 @@
 % to load the file again, just type load filename
 % load MastervNeutralOnly
 %
-% Special Fields
-% ------------ These field names have special meaning in the program ----
-% 
-% Subjects or N     : sample size
-% FixedRandom       : fixed or random effects
-% Subjective Weights : weighting vector based on FixedRandom and whatever
-%   else you want to weight by; e.g., study reporting threshold
-% x, y, z           : coordinates
-% study or Study    : name of study
-% Contrast          : unique indices (e.g., 1:k) for each independent
-%                     contrast
-
+% If a variable dbsave is created with a text string, the DB structure will
+% be saved in a .mat file with the name specified by the string.
 
 clear a DBnames
 global study
 
 % not to be used in variable names
-badstrings = '!@#$%^&*(){}[] ~`\|<>,.?/;:"''+=';
+badstrings = '!@#$%^&*(){}[] ~`\/|<>,.?/;:"''+=';
 
 % -----------------------------------------------------------------------------
 % * load database and read in first column - first row of first col is num columns
 % -----------------------------------------------------------------------------
 
-if ~exist('dbname') == 1, dbname = input('Enter name of input file: ','s');,end
+if ~exist('dbname') == 1, dbname = input('Enter name of input file: ','s'); end
 
 a = textread(dbname,'%s%*[^\n]','delimiter','\t');
 numc = str2num(a{1});
@@ -222,7 +247,16 @@ for i = 1:length(DBnames)
     end
 end
 
-if ~exist('dbsave') == 1, dbsave = input('Enter name of file to save (without .mat extension): ','s'); end
+% Save, if dbsave var is entered
+
+if ~exist('dbsave', 'var')
+    % do not save; do nothing
+    
+else
+    if isempty(dbsave)
+        dbsave = input('Enter name of file to save (without .mat extension): ','s'); 
+    end
+end
 
 eval(['save ' dbsave])
 

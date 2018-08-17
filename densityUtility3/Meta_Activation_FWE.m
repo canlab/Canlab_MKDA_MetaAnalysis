@@ -6,13 +6,20 @@
 % 'setup'   : Create activation map and save MC_SETUP file in current directory
 % 'mc'      : Add iterations and save in MC_Info in current dir
 % 'results' : Get results
-% 'all'     : Doo all of the above in sequence
+% 'all'     : Do all of the above in sequence
+%
+% Optional inputs: 
+% Enter these only AFTER obligatory inputs specified below:
+% 'nocontrasts' : Do not specify contrasts across conditions, and do not
+%                 prompt user (non-interactive mode)
+% 'noverbose'   : Do not print output showing progress updates during mc
+% iteration
 %
 % See below for specific formatting strings:
 % 
 % ALL
 % ----------------------------------------------------------------------
-% Meta_Activation_FWE('all', DB, iterations)   [default]
+% Meta_Activation_FWE('all', DB, iterations, [other inputs])   [default]
 % > Run all of the commands below in sequence
 %
 % SETUP
@@ -60,6 +67,9 @@
 %
 % by Tor Wager, May 2006.  See Programmers' notes in function for more details.
 
+
+% Programmers' notes:
+% ------------------------------------------------------------------------
 % by Tor Wager, May 2006.
 % edited by Matthew Davidson June 2006
 % modified: tor, Aug 2006
@@ -67,7 +77,6 @@
 % tor: march 2010, to add bivalent colors 'add' option
 % tor: june 2016, added 'nocontrasts' option and a bit of documentation
 
-% Programmers' notes:
 % 4.7.2013  There was a bug in Meta_Activation_FWE that made it not robust to using 
 % non-ascending numerical order of contrasts in DB.Contrast.  
 % The function meta_prob_activation was reconstructing the maps in ascending order of 
@@ -87,13 +96,24 @@
 % save separate results masks for each threshold you select.
 
 function varargout = Meta_Activation_FWE(meth, varargin)
+
+    doverbose = true;
+    if any(strcmp(varargin, 'noverbose')), doverbose = false; end
+    
     varargout = {};
 
     switch lower(meth)
         
         case 'all'
-            MC_Setup = Meta_Activation_FWE('setup', varargin{1});
-            Meta_Activation_FWE('mc', varargin{2})
+            
+            if length(varargin) > 2
+                extra_args = varargin(3:end);
+            else
+                extra_args = {};
+            end
+
+            MC_Setup = Meta_Activation_FWE('setup', varargin{1}, extra_args{:});
+            Meta_Activation_FWE('mc', varargin{2}, extra_args{:})
             Meta_Activation_FWE('results')
             
         case 'setup'
@@ -109,42 +129,53 @@ function varargout = Meta_Activation_FWE(meth, varargin)
             end
             
             if docons
+                
                 [X,connames, DB, Xi, Xinms, condf, testfield, contrasts] = Meta_Logistic_Design(DB);
                 [MC_Setup, activation_proportions] = meta_prob_activation(DB, Xi, contrasts, connames, Xinms);
+                
             else
+                
                 [MC_Setup, activation_proportions] = meta_prob_activation(DB);
-                disp('Activation map written: Activation_proportion.img');
+                if doverbose, disp('Activation map written: Activation_proportion.img'); end
+                
             end
 
             % THE CODE BELOW IS REQUIRED FOR BLOB-SHUFFLING ONLY
             % ------------------------------------------------
             % set up blobs for all studies
             % ------------------------------------------------
-            str = sprintf('Getting blobs for all studies'); fprintf(1, str);
+            if doverbose
+                str = sprintf('Getting blobs for all studies');
+                fprintf(1, str);
+            end
+            
             s = size(MC_Setup.unweighted_study_data, 2);
             MC_Setup.cl = cell(1,s);
             for i = 1:s
                 MC_Setup.cl{i} = iimg_indx2contiguousxyz(MC_Setup.unweighted_study_data(:,i),MC_Setup.volInfo,1);
             end
-            erase_string(str);
-
+            
+            if doverbose
+                erase_string(str);
+            end
+            
             % ------------------------------------------------
             % Save setup info
             % ------------------------------------------------
             if exist(fullfile(pwd, 'MC_Info.mat'),'file')
                 save MC_Info -append MC_Setup activation_proportions
-                disp('Appended info to existing MC_Info.mat.');
+                if doverbose, disp('Appended info to existing MC_Info.mat.'); end
             else
                 save MC_Info MC_Setup activation_proportions
-                disp('Created new MC_Info.');
+                if doverbose, disp('Created new MC_Info.'); end
             end
             
             if exist(fullfile(pwd, 'SETUP.mat'),'file')
                 save SETUP -append DB
-                disp('Appended DB to existing SETUP.mat.');
+                if doverbose, disp('Appended DB to existing SETUP.mat.'); end
             else
                 save SETUP DB
-                disp('Created new SETUP.mat file and saved DB in it.');
+                if doverbose, disp('Created new SETUP.mat file and saved DB in it.'); end
             end
             
             varargout{1} = MC_Setup;
@@ -160,11 +191,11 @@ function varargout = Meta_Activation_FWE(meth, varargin)
 
             last = length(maxprop.act);
 
-            fprintf(1,'Iteration ');
+            if doverbose, fprintf(1,'Iteration '); end
 
             for i = startat:last
 
-                fprintf(1,'%05d ',i);
+                if doverbose, fprintf(1,'%05d ',i); end
 
                 %[maxprop(i),uncor_prop(i,:),maxcsize(i,:)] = meta_stochastic_activation(MC_Setup);
 
@@ -189,16 +220,21 @@ function varargout = Meta_Activation_FWE(meth, varargin)
                 end
 
                 if mod(i,10) == 0 || i == last
-                    str = sprintf('Saving results in MC_Info'); fprintf(1,str);
+                    if doverbose
+                        str = sprintf('Saving results in MC_Info'); 
+                        fprintf(1,str);
+                    end
+                    
                     save MC_Info -append maxprop uncor_prop maxcsize
-                    erase_string(str);
+                    
+                    if doverbose, erase_string(str); end
                 end
 
-                fprintf(1,'\b\b\b\b\b\b');
+                if doverbose, fprintf(1,'\b\b\b\b\b\b'); end
 
             end
 
-            fprintf(1,'Done!\n');
+            if doverbose, fprintf(1,'Done!\n'); end
             toc
 
         case 'results'
@@ -464,7 +500,7 @@ function varargout = Meta_Activation_FWE(meth, varargin)
             end
         end
     end
-end
+end % Main function
 
 
 
@@ -538,7 +574,7 @@ function [MC_Setup, maxprop, uncor_prop, maxcsize,startat] = setup_mc_vars(iter)
     end
 
     startat = find(maxprop.act == 0); startat = startat(1);
-end
+end % setup mc vars
 
 
 
@@ -565,9 +601,13 @@ function [MC_Setup, statmap, imgprefix, maxprop, uncor_prop, maxcsize, conidx] =
     % load file
     % ------------
     if ~exist('MC_Info.mat','file')
+        
         error('You must have an MC_Info file in the current dir that contains MC_Setup.');
+        
     else
-        load MC_Info
+        
+        load(fullfile(pwd, 'MC_Info.mat'));
+
     end
 
     % check mc iterations
@@ -619,7 +659,7 @@ function [MC_Setup, statmap, imgprefix, maxprop, uncor_prop, maxcsize, conidx] =
                     error('Unknown maptype: %s - must be ''act'', ''poscon'', or ''negcon''', maptype);
             end
     end
-end
+end % setup_results_vars
 
 % SUBFUNCTION:
 % --------------------------------------------------------------------

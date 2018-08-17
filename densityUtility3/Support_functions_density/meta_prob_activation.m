@@ -46,14 +46,16 @@ if ~isfield(DB, 'x'), error('Missing DB.x,y,z.  Try running Meta_Setup.'); end
 if ~isfield(DB, 'studyweight'), error('Missing DB.studyweight.  Try running Meta_Setup.'); end
 
 % set up mask
-str1 = sprintf('Reading mask data'); fprintf(1,str1);
+str1 = sprintf('Reading mask data'); 
+fprintf(1,str1);
 
 %[maskdata,xyzlist,V] = meta_read_mask(DB.maskname);
 
 % the line above works, but this has the extra fields we need.
 [V, maskdata] = iimg_read_img(DB.maskname, 1);
 xyzlist = V.xyzlist;
-maskdata = iimg_reconstruct_3dvol(maskdata, V);
+%maskdata = iimg_reconstruct_3dvol(maskdata, V);
+maskdata = iimg_reconstruct_vols(maskdata, V);
 
 erase_string(str1);
 
@@ -176,9 +178,9 @@ return
 
 
 function wts = setup_weights(DB,nc)
-if isfield(DB,'studyweight') && ~isempty(DB.studyweight);
+if isfield(DB,'studyweight') && ~isempty(DB.studyweight)
     wts = DB.studyweight;
-    if length(wts) ~= nc,
+    if length(wts) ~= nc
         error('Length of study weight vector DB.studyweight does not match number of contrasts.');
     end
 end

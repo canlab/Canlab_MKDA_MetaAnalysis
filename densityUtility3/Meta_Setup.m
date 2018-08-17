@@ -53,6 +53,9 @@ function DB = Meta_Setup(DB, varargin)
             % spm_defaults is a function
             spm_defaults()
 
+        case 'SPM12'
+            spm('defaults','fmri');
+            
         otherwise
             % unknown SPM
             disp('Unknown version of SPM!');
