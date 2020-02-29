@@ -5,6 +5,11 @@ function [pt,st] = contingency_table(varargin)
 % varargin arguments are variables
 % vars must be column cell array vectors containing strings
 %
+% pt: Table of point (coordinate) counts
+% st: Table of unique study counts
+%
+% rows represent levels of first varable, columns 2nd input variable
+%
 % Examples:
 % global study
 % study = DB.Study;

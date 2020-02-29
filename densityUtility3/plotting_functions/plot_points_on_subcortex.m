@@ -81,7 +81,7 @@ switch name
         cl = merge_clusters(cl,c);
         han{end+1} = h;
         
-        [c,h,surfhan{end+1}] = show_cl(DB,'nucleus accumbens',colors,condf);
+        [c,h,surfhan{end+1}] = show_cl(DB,'nac',colors,condf);
         cl = merge_clusters(cl,c);
         han{end+1} = h;
     otherwise
@@ -143,11 +143,11 @@ if isstr(name)
             pname = which('spm2_right.img');
             surfhan = addbrain(name);
             
-        case 'nucleus accumbens'
+        case {'nac' 'nucleus accumbens'}
             P = which('NucAccumb_clusters.mat');
             load(P)
             cl = cl(1:2);
-            surfhan = addbrain(name);
+            surfhan = addbrain('nacc');
             
             cl = rmfield(cl, 'descrip');  % so we can use descrip field later if data is entered there
             

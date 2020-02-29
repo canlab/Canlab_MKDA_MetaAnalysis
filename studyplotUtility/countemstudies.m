@@ -17,7 +17,7 @@ function [count,studies,studycount] = countemstudies(varname,inputstr,varname2,i
 global study
 count = 0;
 
-if isempty(study), error('Error in countemstudies: declare study as global variable in workspace/script.'),end
+if isempty(study), error('Error in countemstudies: declare study as global variable in workspace/script and populate studies, e.g., study = DB.Study;.'),end
 
 switch nargin
 case 2
