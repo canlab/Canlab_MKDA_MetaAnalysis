@@ -38,6 +38,11 @@
 % ----------------------------------------------------------------------
 % Meta_Activation_FWE('results')
 % > Get and plot results
+%
+% See also: Meta_results_batch_script, publish_meta_analysis_report
+% These use the newer object-oriented functions to create and show results
+% in a different way.
+%
 % Examples:
 % For contrasts, positive contrast values.  The 1 below indicates to make plots.
 % cl = Meta_Activation_FWE('results', 1, 'poscon')
@@ -66,7 +71,9 @@
 % cl_negpos = Meta_Activation_FWE('results', 1, 'height', 'stringent', 'medium', 'negcon', 'add', 'colors', { [0 0 1] [0 .5 1] [.3 .3 1] });
 %
 % by Tor Wager, May 2006.  See Programmers' notes in function for more details.
-
+%
+% See also: 
+% Meta_results_batch_script, publish_meta_analysis_report
 
 % Programmers' notes:
 % ------------------------------------------------------------------------
