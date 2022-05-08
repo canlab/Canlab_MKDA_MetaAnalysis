@@ -40,11 +40,11 @@ function varargout = Meta_cluster_tools(meth,varargin)
 % ------------------------------------------------------
 % count studies by condition and plot [optional]
 %
-% [prop_by_condition,se,num_by_condition,n] = Meta_cluster_tools('count_by_condition',dat,Xi,w,doplot,[xnames],[seriesnames], [colors])
+% [prop_by_condition,se,num_by_condition,n, table_obj] = Meta_cluster_tools('count_by_condition',dat,Xi,w,doplot,[xnames],[seriesnames], [colors])
 %
-% [prop_by_condition,se,num_by_condition,n] = Meta_cluster_tools('count_by_condition',studybyset,MC_Setup.Xi,MC_Setup.wts,1)
+% [prop_by_condition,se,num_by_condition,n, table_obj] = Meta_cluster_tools('count_by_condition',studybyset,MC_Setup.Xi,MC_Setup.wts,1)
 %
-% [prop_by_condition,se,num_by_condition,n] = ...
+% [prop_by_condition,se,num_by_condition,n, table_obj] = ...
 %   Meta_cluster_tools('count_by_condition',studybyroi,MC_Setup.Xi,MC_Setup.wts,1, ...
 %   {'Right' 'Left'},MC_Setup.connames(1:5),{[1 0 0] [0 1 0] [1 0 1] [1 1 0] [0 0 1]});
 %
@@ -52,7 +52,7 @@ function varargout = Meta_cluster_tools(meth,varargin)
 % nms = SOMResults.alltasknms(9:13)
 % w = SOMResults.w;
 % colors = {[1 0 0] [0 1 0] [1 0 1] [1 1 0] [0 0 1]};
-% [prop_by_condition,se,num_by_condition,n] = ...
+% [prop_by_condition,se,num_by_condition,n, table_obj] = ...
 %   Meta_cluster_tools('count_by_condition',studybyroi,Xi,w,1, ...
 %   {'Right' 'Left'},nms,colors);
 %
@@ -65,7 +65,7 @@ function varargout = Meta_cluster_tools(meth,varargin)
 % R = Meta_Chisq_new('compute',MC_Setup,'mask',mask);
 % R = Meta_Chisq_new('write',R);
 % [studybyroi,studybyset] = Meta_cluster_tools('getdata',cl,R.dat,R.volInfo);
-% [prop_by_condition,se,num_by_condition,n] = Meta_cluster_tools('count_by_condition',studybyset,R.Xi,R.w,1);
+% [prop_by_condition,se,num_by_condition,n, table_obj] = Meta_cluster_tools('count_by_condition',studybyset,R.Xi,R.w,1);
 % ------------------------------------------------------
 
 switch meth
@@ -92,14 +92,14 @@ switch meth
         end
         
     case 'count_by_condition'
-        %[prop_by_condition,se,num_by_condition,n] = Meta_cluster_tools('count_by_condition',dat,Xi,w,doplot,[xnames],[seriesnames], [colors])
-        %[prop_by_condition,se,num_by_condition,n] = count_by_condition(dat,Xi,w,doplot)
+        %[prop_by_condition,se,num_by_condition,n, table_obj] = Meta_cluster_tools('count_by_condition',dat,Xi,w,doplot,[regionnames],[seriesnames], [colors])
+        %[prop_by_condition,se,num_by_condition,n, table_obj] = count_by_condition(dat,Xi,w,doplot)
         
         if length(varargin) < 4, varargin{4} = 0; end
         if length(varargin) < 5, varargin{5} = []; end
         if length(varargin) < 6, varargin{6} = []; end
         if length(varargin) < 7, varargin{7} = []; end  %colors
-        [varargout{1},varargout{2},varargout{3},varargout{4}] = count_by_condition(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6},varargin{7});
+        [varargout{1},varargout{2},varargout{3},varargout{4}, varargout{5}] = count_by_condition(varargin{1},varargin{2},varargin{3},varargin{4},varargin{5},varargin{6},varargin{7});
         
         
     case 'activation_table'
@@ -177,7 +177,7 @@ disp('Getting studies that activated in each region.')
 [studybyroi,studybyset] = Meta_cluster_tools('getdata',cl,MC_Setup.unweighted_study_data,MC_Setup.volInfo);
 
 disp('Counting studies by condition')
-[prop_by_condition,se,num_by_condition,n] = Meta_cluster_tools('count_by_condition',studybyroi,MC_Setup.Xi,MC_Setup.wts,doplot);
+[prop_by_condition,se,num_by_condition,n, table_obj] = Meta_cluster_tools('count_by_condition',studybyroi,MC_Setup.Xi,MC_Setup.wts,doplot);
 
 % get field names for conditions
 fnames = MC_Setup.Xinms;
@@ -255,7 +255,7 @@ end
 % -------------------------------------------------------------------------
 % -------------------------------------------------------------------------
 
-function [prop_by_condition,se,num_by_condition,n] = count_by_condition(dat,Xi,w,doplot,varargin)
+function [prop_by_condition,se,num_by_condition,n, table_obj] = count_by_condition(dat,Xi,w,doplot,varargin)
 
 if nargin < 4, doplot = 0; end
 
@@ -273,12 +273,14 @@ n = repmat(n,nregions,1);
 se = ( (prop_by_condition .* (1-prop_by_condition) ) ./ n ).^.5;
 
 if doplot
-    xnames = [];
-    seriesnames = [];
-    mycolors = [];
-    if length(varargin) > 0, xnames = varargin{1}; end
-    if length(varargin) > 1, seriesnames = varargin{2}; end
-    if length(varargin) > 2, mycolors = varargin{3}; end
+    
+    xnames = repmat({'Region'}, 1, size(prop_by_condition, 1));
+    seriesnames = repmat({'Cond'}, 1, size(prop_by_condition, 2));
+    mycolors = scn_standard_colors(size(prop_by_condition, 2));
+    
+    if length(varargin) > 0 && ~isempty(varargin{1}), xnames = varargin{1}; end
+    if length(varargin) > 1 && ~isempty(varargin{2}), seriesnames = varargin{2}; end
+    if length(varargin) > 2 && ~isempty(varargin{3}), mycolors = varargin{3}; end
     
     create_figure('barplot');
     fprintf('Sample size is %3.0f\n', size(Xi, 1));
@@ -286,7 +288,17 @@ if doplot
     barplot_grouped(prop_by_condition, se, xnames, seriesnames, 'inputmeans', 'colors', mycolors);
     
     ylabel('Proportion of studies activating');
+    
 end
+
+% Table of contrast data
+table_obj = table();
+   
+propdat = mat2cell(prop_by_condition, size(prop_by_condition, 1), ones(1, length(seriesnames)));
+sedat = mat2cell(se, size(prop_by_condition, 1), ones(1, length(seriesnames)));
+
+senames = cellfun(@(x) ['SE_' x], seriesnames, 'UniformOutput', false);
+table_obj = table(xnames', propdat{:}, sedat{:}, 'Variablenames',  [{'Region'} seriesnames senames]);
 
 end
 

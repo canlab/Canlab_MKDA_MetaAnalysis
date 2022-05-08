@@ -320,13 +320,14 @@ if ~isempty(region_obj)
         colors = seaborn_colors(size(MC_Setup.Xi, 2));
         regionnames = cat(2, {region_obj.shorttitle});
         
-        [prop_by_condition,se,num_by_condition,n, table_obj] = Meta_cluster_tools('count_by_condition', studybyroi, MC_Setup.Xi, MC_Setup.wts, 1, regionnames, MC_Setup.Xinms, colors);
+        [prop_by_condition,se,num_by_condition,n] = Meta_cluster_tools('count_by_condition', studybyroi, MC_Setup.Xi, MC_Setup.wts, 1, regionnames, MC_Setup.Xinms, colors);
         
-        % Table of contrast data - now included in Meta_cluster_tools
-        disp(table_obj)
+        % Table of contrast data
+        propdat = mat2cell(prop_by_condition, size(prop_by_condition, 1), ones(1, length(MC_Setup.Xinms)));
+        sedat = mat2cell(se, size(prop_by_condition, 1), ones(1, length(MC_Setup.Xinms)));
         
-        disp('Attaching table obj to region(1).custom_info1')
-        region_obj(1).custom_info1 = table_obj;
+        senames = cellfun(@(x) ['SE_' x], MC_Setup.Xinms, 'UniformOutput', false);
+        t = table(regionnpropdat{:}, sedat{:}, 'Variablenames',  [MC_Setup.Xinms senames], 'Rownames', regionnames);
         
     end % Conditions/contrasts plot
     
